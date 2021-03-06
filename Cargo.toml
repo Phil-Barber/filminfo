@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 structopt = "0.3.13"
 anyhow = "1.0"
-enum-utils = "0.1.2"
+clap = "2.33.0"

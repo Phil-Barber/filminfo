@@ -1,26 +1,19 @@
-use std::fmt;
 use anyhow::Result;
 use structopt::StructOpt;
+use clap::arg_enum;
 
-#[derive(Debug, enum_utils::FromStr)]
-enum EntityType {
-    #[enumeration(rename="film")]
-    Film,
-    #[enumeration(rename="actor")]
-    Actor,
-}
-impl fmt::Display for EntityType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::Film => write!(f, "film"),
-            Self::Actor => write!(f, "actor"),
-        }
+arg_enum! {
+    #[derive(Debug)]
+    enum EntityType {
+        Film,
+        Actor,
     }
 }
 
 /// Search for a film and display useful info for it
-#[derive(StructOpt)] struct Cli {
+#[derive(StructOpt, Debug)] struct Cli {
     /// The entity type to get info for
+    #[structopt(possible_values = &EntityType::variants(), case_insensitive = true)]
     entity_type: EntityType,
     /// search string
     search: String,
