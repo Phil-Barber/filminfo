@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result};
 use structopt::StructOpt;
 use clap::arg_enum;
 
@@ -17,11 +17,24 @@ arg_enum! {
     entity_type: EntityType,
     /// search string
     search: String,
+    /// path to config
+    #[structopt(short, long, default_value="./config.json")]
+    config_path: String,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let args = Cli::from_args();
     println!("entity_type: {}", &args.entity_type);
     println!("search: {}", &args.search);
+    println!("config_path: {}", &args.config_path);
+
+    let config = filminfo::get_config(&args.config_path)?;
+    println!("config: {:?}", &config);
+
+    let result = reqwest::get(&config.base_url)
+        .await?;
+    println!("{:?}", result);
+
     Ok(())
 }
