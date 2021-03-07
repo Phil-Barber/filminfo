@@ -1,14 +1,6 @@
 use anyhow::{Result};
 use structopt::StructOpt;
-use clap::arg_enum;
-
-arg_enum! {
-    #[derive(Debug)]
-    enum EntityType {
-        Film,
-        Actor,
-    }
-}
+use filminfo::EntityType;
 
 /// Search for a film and display useful info for it
 #[derive(StructOpt, Debug)] struct Cli {
@@ -32,7 +24,15 @@ async fn main() -> Result<()> {
     let config = filminfo::get_config(&args.config_path)?;
     println!("config: {:?}", &config);
 
-    let result = reqwest::get(&config.base_url)
+    let query_string = filminfo::build_query(&args.entity_type, &args.search);
+    let url = format!(
+        "{base_url}{query_string}", 
+        base_url = &config.base_url,
+        query_string = &query_string,
+    );
+    let result = reqwest::get(&url)
+        .await?
+        .text()
         .await?;
     println!("{:?}", result);
 
