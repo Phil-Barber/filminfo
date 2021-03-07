@@ -1,5 +1,6 @@
 use clap::arg_enum;
 use anyhow::{Context, Result};
+use kuchiki::NodeRef;
 
 arg_enum! {
     #[derive(Debug)] pub enum EntityType {
@@ -35,6 +36,30 @@ pub fn build_query(entity_type: &EntityType, search: &str) -> String {
         search=search
     )
 }
+
+pub fn chose_result(dom: &NodeRef) -> Result<()> {
+    let results = dom.select(".findResult").unwrap();
+    for dom_match in results.take(3) {
+        unpack_result(&dom_match.as_node())?;
+    }
+    Ok(())
+}
+
+fn unpack_result(result: &NodeRef) -> Result<()> {
+    let result_children = result
+        .select(".result_text")
+        .unwrap()
+        .next()
+        .unwrap()
+        .as_node()
+        .children();
+    println!("Printing child:");
+    for child in result_children {
+        println!("{:?}", child)
+    }
+    Ok(())
+}
+
 
 #[cfg(test)]
 mod tests {

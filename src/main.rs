@@ -1,6 +1,7 @@
 use anyhow::{Result};
 use structopt::StructOpt;
 use filminfo::EntityType;
+use kuchiki::traits::*;
 
 /// Search for a film and display useful info for it
 #[derive(StructOpt, Debug)] struct Cli {
@@ -30,11 +31,14 @@ async fn main() -> Result<()> {
         base_url = &config.base_url,
         query_string = &query_string,
     );
-    let result = reqwest::get(&url)
+    let res = reqwest::get(&url)
         .await?
         .text()
         .await?;
-    println!("{:?}", result);
+
+    let dom = kuchiki::parse_html().one(res);
+
+    let result = filminfo::chose_result(&dom);
 
     Ok(())
 }
