@@ -1,7 +1,10 @@
 use anyhow::{Result};
 use structopt::StructOpt;
-use filminfo::EntityType;
 use kuchiki::traits::*;
+
+use filminfo::input;
+use filminfo::input::EntityType;
+use filminfo::search;
 
 /// Search for a film and display useful info for it
 #[derive(StructOpt, Debug)] struct Cli {
@@ -22,10 +25,10 @@ async fn main() -> Result<()> {
     println!("search: {}", &args.search);
     println!("config_path: {}", &args.config_path);
 
-    let config = filminfo::get_config(&args.config_path)?;
+    let config = input::get_config(&args.config_path)?;
     println!("config: {:?}", &config);
 
-    let query_string = filminfo::build_query(&args.entity_type, &args.search);
+    let query_string = search::build_query(&args.entity_type, &args.search);
     let url = format!(
         "{base_url}{query_string}", 
         base_url = &config.base_url,
@@ -38,7 +41,7 @@ async fn main() -> Result<()> {
 
     let dom = kuchiki::parse_html().one(res);
 
-    let result = filminfo::chose_result(&dom);
+    let result = search::chose_result(&dom);
 
     Ok(())
 }
