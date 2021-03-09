@@ -1,10 +1,35 @@
 use anyhow::{Result};
-use kuchiki::NodeRef;
+use kuchiki::{ElementData, NodeDataRef, NodeRef};
 use crate::input::EntityType;
 
 #[derive(Debug)] pub struct SearchResult {
     url: String,
     display: String,
+}
+impl SearchResult {
+    pub fn new(url: String, display: String) -> Self {
+        Self {url, display}
+    }
+
+    pub fn from_node_ref(node_ref: NodeDataRef<ElementData>) -> Self {
+        let node = node_ref.as_node();
+        let text = node.text_contents();
+        let display = text.trim();
+
+        let anchor = node
+            .select("a")
+            .unwrap()
+            .next()
+            .unwrap();
+        let element = anchor
+            .as_node()
+            .as_element()
+            .unwrap();
+
+        let attributes = element.attributes.borrow();
+        let url = attributes.get("href").unwrap();
+        Self::new(String::from(display), String::from(url))
+    }
 }
 
 pub fn build_query(entity_type: &EntityType, search: &str) -> String {
@@ -22,27 +47,11 @@ pub fn build_query(entity_type: &EntityType, search: &str) -> String {
 pub fn chose_result(dom: &NodeRef) -> Result<()> {
     let results = dom.select(".findResult").unwrap();
     for dom_match in results.take(3) {
-        println!("Up: {}", &dom_match.as_node().text_contents());
-        unpack_result(&dom_match.as_node())?;
+        let result = SearchResult::from_node_ref(dom_match);
+        println!("{:?}", result);
     }
     Ok(())
 }
-
-fn unpack_result(result: &NodeRef) -> Result<()> {
-    let result_children = result
-        .select(".result_text")
-        .unwrap()
-        .next()
-        .unwrap()
-        .as_node()
-        .children();
-    println!("Printing child:");
-    for child in result_children {
-        println!("{:?}", child.text_contents())
-    }
-    Ok(())
-}
-
 
 #[cfg(test)]
 mod tests {
