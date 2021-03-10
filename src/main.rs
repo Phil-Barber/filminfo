@@ -31,6 +31,11 @@ async fn main() -> Result<()> {
         &config, 
         &args.entity_type,
         &args.search
-    );
+    ).await?;
+    println!("Results found:");
+    for result in results {
+        println!("{:?}", result);
+    }
+
     Ok(())
 }

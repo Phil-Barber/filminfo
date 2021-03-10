@@ -40,7 +40,7 @@ pub async fn make_search(
 ) -> Result<Vec<SearchResult>> {
     let query_string = build_query(&entity_type, &search);
     let url = format!(
-        "{base_url}{query_string}", 
+        "{base_url}find?{query_string}", 
         base_url = &config.base_url,
         query_string = &query_string,
     );
