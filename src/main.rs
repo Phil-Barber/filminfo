@@ -1,6 +1,5 @@
 use anyhow::{Result};
 use structopt::StructOpt;
-use kuchiki::traits::*;
 
 use filminfo::input;
 use filminfo::input::EntityType;
@@ -28,20 +27,10 @@ async fn main() -> Result<()> {
     let config = input::get_config(&args.config_path)?;
     println!("config: {:?}", &config);
 
-    let query_string = search::build_query(&args.entity_type, &args.search);
-    let url = format!(
-        "{base_url}{query_string}", 
-        base_url = &config.base_url,
-        query_string = &query_string,
+    let results = search::make_search(
+        &config, 
+        &args.entity_type,
+        &args.search
     );
-    let res = reqwest::get(&url)
-        .await?
-        .text()
-        .await?;
-
-    let dom = kuchiki::parse_html().one(res);
-
-    let result = search::chose_result(&dom);
-
     Ok(())
 }

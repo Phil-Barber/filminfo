@@ -1,6 +1,7 @@
 use anyhow::{Result};
 use kuchiki::{ElementData, NodeDataRef, NodeRef};
-use crate::input::EntityType;
+use kuchiki::traits::*;
+use crate::input::{Config, EntityType};
 
 #[derive(Debug)] pub struct SearchResult {
     url: String,
@@ -32,7 +33,26 @@ impl SearchResult {
     }
 }
 
-pub fn build_query(entity_type: &EntityType, search: &str) -> String {
+pub async fn make_search(
+    config: &Config, 
+    entity_type: &EntityType, 
+    search: &str
+) -> Result<Vec<SearchResult>> {
+    let query_string = build_query(&entity_type, &search);
+    let url = format!(
+        "{base_url}{query_string}", 
+        base_url = &config.base_url,
+        query_string = &query_string,
+    );
+    let res = reqwest::get(&url)
+        .await?
+        .text()
+        .await?;
+    let dom = kuchiki::parse_html().one(res);
+    return get_results_from_dom(&dom);
+}
+
+fn build_query(entity_type: &EntityType, search: &str) -> String {
     let e_type_str = match entity_type {
         EntityType::Film => "tt",
         EntityType::Actor => "nm",
@@ -44,13 +64,12 @@ pub fn build_query(entity_type: &EntityType, search: &str) -> String {
     )
 }
 
-pub fn chose_result(dom: &NodeRef) -> Result<()> {
-    let results = dom.select(".findResult").unwrap();
-    for dom_match in results.take(3) {
-        let result = SearchResult::from_node_ref(dom_match);
-        println!("{:?}", result);
-    }
-    Ok(())
+fn get_results_from_dom(dom: &NodeRef) -> Result<Vec<SearchResult>> {
+    let dom_results = dom.select(".findResult").unwrap();
+    let search_results = dom_results
+        .map(|dom_match| SearchResult::from_node_ref(dom_match))
+        .collect();
+    Ok(search_results)
 }
 
 #[cfg(test)]
@@ -70,3 +89,5 @@ mod tests {
         );
     }
 }
+
+
