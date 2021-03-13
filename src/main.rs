@@ -1,5 +1,6 @@
 use anyhow::{Result};
 use structopt::StructOpt;
+use dialoguer::Select;
 
 use filminfo::input;
 use filminfo::input::EntityType;
@@ -32,10 +33,17 @@ async fn main() -> Result<()> {
         &args.entity_type,
         &args.search
     ).await?;
-    println!("Results found:");
-    for result in results {
-        println!("{:?}", result);
+
+    let items_per_page = 3;
+    let mut results_iter = results.iter();
+    let mut selector = Select::new();
+    for _ in 0..items_per_page {
+        let next = results_iter.next();
+        if !next.is_none() {
+            &selector.item(next.unwrap());
+        }
     }
+    let _chosen = selector.interact()?;
 
     Ok(())
 }

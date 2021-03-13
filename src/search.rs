@@ -1,3 +1,4 @@
+use std::fmt;
 use anyhow::{Result};
 use kuchiki::{ElementData, NodeDataRef, NodeRef};
 use kuchiki::traits::*;
@@ -29,7 +30,12 @@ impl SearchResult {
 
         let attributes = element.attributes.borrow();
         let url = attributes.get("href").unwrap();
-        Self::new(String::from(display), String::from(url))
+        Self::new(String::from(url), String::from(display))
+    }
+}
+impl fmt::Display for SearchResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.display)
     }
 }
 
