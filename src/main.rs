@@ -1,10 +1,10 @@
 use anyhow::{Result};
 use structopt::StructOpt;
-use dialoguer::Select;
 
 use filminfo::input;
 use filminfo::input::EntityType;
 use filminfo::search;
+use filminfo::select;
 
 /// Search for a film and display useful info for it
 #[derive(StructOpt, Debug)] struct Cli {
@@ -34,16 +34,7 @@ async fn main() -> Result<()> {
         &args.search
     ).await?;
 
-    let items_per_page = 3;
-    let mut results_iter = results.iter();
-    let mut selector = Select::new();
-    for _ in 0..items_per_page {
-        let next = results_iter.next();
-        if !next.is_none() {
-            &selector.item(next.unwrap());
-        }
-    }
-    let _chosen = selector.interact()?;
+    let _chosen_result = select::get_selected_item(results.iter());
 
     Ok(())
 }
