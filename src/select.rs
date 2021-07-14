@@ -28,6 +28,8 @@ pub fn get_selected_item<'a>(
     mut iter: impl Iterator<Item = &'a SearchResult>
 ) -> Option<&'a SearchResult> {
     let page_size = 3;
-    let chosen_index = page(iter.by_ref(), page_size)?;
+    let cloned = iter.cloned().collect();
+    let chosen_index = page(cloned, page_size)?;
+    println!("Index: {:?}", chosen_index);
     iter.nth(chosen_index)
 }

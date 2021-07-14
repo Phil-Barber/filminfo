@@ -4,7 +4,7 @@ use kuchiki::{ElementData, NodeDataRef, NodeRef};
 use kuchiki::traits::*;
 use crate::input::{Config, EntityType};
 
-#[derive(Debug)] pub struct SearchResult {
+#[derive(Clone, Debug)] pub struct SearchResult {
     url: String,
     display: String,
 }

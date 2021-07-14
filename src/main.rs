@@ -34,7 +34,8 @@ async fn main() -> Result<()> {
         &args.search
     ).await?;
 
-    let _chosen_result = select::get_selected_item(results.iter());
+    let chosen_result = select::get_selected_item(results.iter());
+    println!("Chosen: {:?}", chosen_result);
 
     Ok(())
 }
